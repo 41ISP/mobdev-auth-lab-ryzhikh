@@ -1,67 +1,85 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Button from "../components/Button"
 import Input from "../components/Input"
 import { useState } from "react"
+import { useUserStore } from "../store/useUserStore"
+import { api } from "../api/api"
 
 const Login = () => {
-    const [error, setError] = useState("")
-    const handleSubmit = () => {}
+const [error, setError] = useState("")
+const navigate = useNavigate()
+const setSession = useUserStore((state) => state.setSession)
 
-    return (
-        <div className="container">
-            <div class="auth-container">
-                {error.length > 0 && <div className="auth-error">{error}</div>}
-                <div class="auth-header">
-                    <div class="auth-icon">🔐</div>
-                    <h1 class="auth-title">Вход</h1>
-                    <p class="auth-subtitle">Войдите в свой аккаунт</p>
-                </div>
+const handleSubmit = async (e) => {
+e.preventDefault()
+setError("")
 
-                <div class="alert alert-error" id="error-alert">
-                    Неверное имя пользователя или пароль
-                </div>
+const user = {
+username: e.target.username.value,
+password: e.target.password.value,
+}
 
-                <form id="login-form" onSubmit={handleSubmit}>
-                    <div class="form-group">
-                        <label class="form-label">Имя пользователя</label>
-                        <Input
-                            type="text"
-                            class="form-input"
-                            name="username"
-                            placeholder="Введите имя пользователя"
-                            required
-                            autocomplete="username"
-                        />
-                        <div class="form-error">Введите имя пользователя</div>
-                    </div>
+try {
+const session = await api.loginUser(user)
+setSession(session)
+navigate("/")
+} catch (err) {
+setError(err.response?.data?.message || "Неверное имя пользователя или пароль")
+}
+}
 
-                    <div class="form-group">
-                        <label class="form-label">Пароль</label>
-                        <Input
-                            type="password"
-                            class="form-input"
-                            name="password"
-                            placeholder="Введите пароль"
-                            required
-                            autocomplete="current-password"
-                        />
-                        <div class="form-error">Введите пароль</div>
-                    </div>
+return (
+<div className="container">
+<div className="auth-container">
+<div className="auth-header">
+<div className="auth-icon">🔐</div>
+<h1 className="auth-title">Вход</h1>
+<p className="auth-subtitle">Войдите в свой аккаунт</p>
+</div>
 
-                    <Button type="submit" class="btn-submit">
-                        Войти
-                    </Button>
-                </form>
+{error && <div className="alert alert-error active">{error}</div>}
 
-                <div class="auth-divider">или</div>
+<form id="login-form" onSubmit={handleSubmit}>
+<div className="form-group">
+<label className="form-label">Имя пользователя</label>
+<Input
+type="text"
+className="form-input"
+name="username"
+placeholder="Введите имя пользователя"
+required
+autoComplete="username"
+/>
+<div className="form-error">Введите имя пользователя</div>
+</div>
 
-                <div class="auth-link">
-                    Нет аккаунта?
-                    <Link to={"/register"}>Зарегистрироваться</Link>
-                </div>
-            </div>
-        </div>
-    )
+<div className="form-group">
+<label className="form-label">Пароль</label>
+<Input
+type="password"
+className="form-input"
+name="password"
+placeholder="Введите пароль"
+required
+autoComplete="current-password"
+/>
+<div className="form-error">Введите пароль</div>
+</div>
+
+<Button type="submit" className="btn-submit">
+Войти
+</Button>
+</form>
+
+<div className="auth-divider">или</div>
+
+<div className="auth-link">
+Нет аккаунта?
+<Link to="/register">Зарегистрироваться</Link>
+</div>
+</div>
+</div>
+)
 }
 
 export default Login
